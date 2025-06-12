@@ -6,7 +6,7 @@ export function up(knex) {
   return knex.schema.createTable('gameslog', (table) => {
     table.increments('id').primary()
     table.integer('user_id')
-    table.boolean('status') //
+    table.boolean('status')
     table.integer('question_used')
     table.integer('hint_used')
     table.string('ai_answer')
