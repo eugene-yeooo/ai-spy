@@ -6,7 +6,8 @@ export async function getAllLogsWithUsername() {
 const logs = await db('gameslog')
 .join('users', 'gameslog.user_id', 'users.id')
 .select('gameslog.id as gameslog_id',
-   'user.id as user_id', 
+   'users.id as users_id', 
+   'uses.username',
    'gameslog.status',
    'gameslog.question_used',
    'gameslog.hint_used',
