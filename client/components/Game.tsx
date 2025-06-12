@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import request from 'superagent'
-import { startGame, submitGuess } from '../apis/gemini'
+import { getGameStart, sendGuess } from '../apis/gemini'
+import { SendGuessData } from '../../models/models'
 
 export default function GameLogic() {
   const [stage, setStage] = useState<'setup' | 'playing' | 'finished'>('setup')
@@ -21,9 +21,9 @@ export default function GameLogic() {
     }
 
     try {
-      const res = await startGame(topic, level)
-      setAnswer(res.data.answer)
-      setConversation([{ sender: 'ai', text: res.data.introMessage }])
+      const res = await getGameStart(topic, level)
+      setAnswer(res.answer)
+      setConversation([{ sender: 'ai', text: res.introMessage }])
       setStage('playing')
       setQuestionCount(0)
       setAnswer('')
@@ -39,9 +39,16 @@ export default function GameLogic() {
       setStage('finished')
     }
 
+    const data: SendGuessData = {
+      answer,
+      topic,
+      conversation,
+      userInput,
+    }
+
     // Update convo with user question and AI answer
     try {
-      const res = await submitGuess(answer, topic, conversation, userInput)
+      const res = await sendGuess(data)
       setConversation((prev) => [
         ...prev,
         { sender: 'user', text: userInput },
