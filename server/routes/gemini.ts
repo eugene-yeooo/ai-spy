@@ -6,7 +6,7 @@ const router = Router()
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
 
-// Route to start a game (GET EXAMPLE: /api/v1/gemini/start?level=easy&topic=New Zealand town)
+// Route to start a game (GET EXAMPLE: /api/v1/gemini/start?level=${level}&topic=${topic})
 router.get('/start', async (req, res) => {
   try {
     const { level, topic } = req.query
