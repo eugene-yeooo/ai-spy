@@ -2,7 +2,6 @@
 import db from './connection.ts'
 
 export async function getAllLogsWithUsername() {
-
 const logs = await db('gameslog')
 .join('users', 'gameslog.user_id', 'users.id')
 .select('gameslog.id as gameslog_id',
@@ -17,4 +16,11 @@ const logs = await db('gameslog')
   )
 .orderBy('gameslog.created_at')
 return logs
+}
+
+// delete
+export async function deleteGameLogById(id: number) {
+  return await db('gameslog')
+  .where({ id })
+  .del()
 }
