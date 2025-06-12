@@ -1,8 +1,10 @@
+import GameLogic from '../components/Game'
+
 function Game() {
   return (
     <>
       <div className="app">
-        <h1>Game</h1>
+        <GameLogic />
       </div>
     </>
   )
