@@ -3,6 +3,7 @@ import { SendGuessData } from '../../models/models'
 
 const rootUrl = new URL('/api/v1', document.baseURI)
 
+//gameStart
 export async function getGameStart(level: string, topic: string) {
   const res = await request.get(
     `${rootUrl}gemini/start?level=${level}&topic=${topic}`,
@@ -13,9 +14,10 @@ export async function getGameStart(level: string, topic: string) {
     throw new Error(err)
   }
 
-  return res.body as Promise<{ answer: string; introMessage: string }>
+  return res.body as { answer: string; introMessage: string }
 }
 
+//sendGuess
 export async function sendGuess(data: SendGuessData) {
   const res = await request.post(`${rootUrl}/gemini/guess`).send(data)
 

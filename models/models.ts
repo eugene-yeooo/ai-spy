@@ -4,3 +4,8 @@ export interface SendGuessData {
   conversation: { sender: 'user' | 'ai'; text: string }[]
   userInput: string
 }
+
+export interface Message {
+  sender: 'user' | 'ai'
+  text: string
+}
