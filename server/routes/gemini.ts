@@ -2,85 +2,82 @@ import { Router } from 'express'
 import { GoogleGenAI } from '@google/genai'
 import 'dotenv/config'
 
-console.log('Gemini route file loaded')
-
 const router = Router()
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
 
-router.get('/', async (req, res) => {
-  console.log(`SERVER LOG: HIT ENDPOINT '/' ON ROUTE 'proxy/gemini'`) // SERVER TEST LOG
-
+// Route to start a game (GET EXAMPLE: /api/v1/gemini/start?level=easy&topic=New Zealand town)
+router.get('/start', async (req, res) => {
   try {
-    const level = req.query.level
-    const topic = req.query.topic
-    // const guesses = req.query.guesses
+    const { level, topic } = req.query
+    if (!level || !topic) {
+      return res.status(400).json({ error: 'Missing level or topic' })
+    }
 
-    if (!level || !topic)
-      throw new Error(
-        `Query parameter(s): ${!level ? 'level' : ''}${!level && !topic ? ', ' : ''}${!topic ? 'topic' : ''} are undefined or cannot be used.`,
-      )
-
-    const initialResponse = await genAI.models.generateContent({
+    const prompt = `Choose a/an ${topic}. Respond with ONLY the name. No explanation.`
+    const pickResponse = await genAI.models.generateContent({
       model: 'gemini-2.0-flash',
-      contents: `You are playing a 20 Questions game with the user.
-
-            1. You must secretly select ${topic}. Do not tell the user what the answer is unless they guess it correctly.
-            2. The user will ask up to 20 yes/no questions to try to figure out which ${topic} you're thinking of.
-            3. Only respond to the user's questions with short, clear answers such as:
-              - "Yes"
-              - "No"
-              - "Sometimes"
-              - "I don't know"
-              - Brief clarifications if needed (e.g., "Yes, it's in the South Island.")
-            4. Keep track of how many questions have been asked and how close the user is.
-            5. If the user correctly guesses the ${topic}, respond with a celebratory message like "Yes! The ${topic} is [Answer]! You got it!". Take note how many questions/guesses the user took to get the right answer.
-            6. If the user reaches 20 questions without guessing correctly, reveal the correct answer.
-            7. 
-            
-            Additional logic:
-            - If the user asks a misleading or confusing question, you can gently ask them to rephrase.
-            - If they ask for a hint, they are allowed three, provide them with a hint based on the selected difficulty (e.g., "It's near a major river").
-
-            Begin the game by saying:
-            "I've picked a ${topic} — start asking your yes/no questions!"`,
+      contents: [{ role: 'user', parts: [{ text: prompt }] }], // gemini model for chat conversation, i.e. "Send a message from the user to Gemini with the following prompt text."
     })
 
-    if (
-      !initialResponse ||
-      !initialResponse.candidates ||
-      !initialResponse.candidates[0] ||
-      !initialResponse.candidates[0].content ||
-      !initialResponse.candidates[0].content.parts ||
-      !initialResponse.candidates[0].content.parts[0] ||
-      !initialResponse.candidates[0].content.parts[0].text ||
-      typeof initialResponse.candidates[0].content.parts[0].text !== 'string'
-    ) {
-      throw new Error('Unexpected data structure in API response.')
-    }
-    const aiMessage = initialResponse.candidates[0].content.parts[0].text
+    const answer =
+      pickResponse.candidates?.[0]?.content?.parts?.[0]?.text?.trim() // gemini's syntax for responses (ctrl + keys to look at documentation)
 
-    const formattedHeading = aiMessage.split('\n')[0].replace(/\*\*/g, '')
-    const formattedBody = aiMessage
-      .replace(/\*\*/g, '')
-      .split('\n')
-      .slice(1)
+    if (!answer) {
+      return res.status(500).json({ error: 'AI failed to pick an answer.' })
+    }
+
+    const introMessage = `I've picked a ${topic} — start asking your yes/no questions!`
+    return res.status(200).json({ answer, introMessage })
+  } catch (err) {
+    console.error('Error in GET /gemini/start', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// Route to handle guesses/questions (POST /api/v1/gemini/guess)
+router.post('/guess', async (req, res) => {
+  try {
+    const { answer, topic, conversation, userInput } = req.body
+
+    if (!answer || !topic || !conversation || !userInput) {
+      return res.status(400).json({ error: 'Missing required fields' })
+    }
+
+    const fullConversation = [
+      ...conversation,
+      { sender: 'user', text: userInput },
+    ]
+
+    // converts fullConversation array into one string, joined by line breaks \n
+    const convoText = fullConversation
+      .map(
+        (msg: any) => `${msg.sender === 'user' ? 'User' : 'AI'}: ${msg.text}`,
+      )
       .join('\n')
 
-    const dataObj = {
-      heading: formattedHeading,
-      body: formattedBody,
-    }
+    const prompt = `You are playing 20 Questions.
+    Secret answer: ${answer}
+    Topic: ${topic}
+    Only respond to the user's questions with yes/no/sometimes/brief clarifications if needed.
+    Keep it short.
 
-    return res.status(200).json(dataObj)
-  } catch (error) {
-    if (error instanceof Error) {
-      console.log(`SERVER ERROR: ${error.message}`) // SERVER TEST LOG
-      return res.status(500).json({ error: error.message })
-    } else {
-      console.log(`SERVER ERROR: Unknown`) // SERVER TEST LOG
-      return res.status(500).json({ error: 'Something went wrong.' })
-    }
+    ${convoText}
+    AI:`
+
+    const aiResponse = await genAI.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    })
+
+    const aiText = aiResponse.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
+
+    if (!aiText) return res.status(500).json({ error: 'AI gave no response' })
+
+    return res.status(200).json({ aiResponse: aiText })
+  } catch (err) {
+    console.error('Error in POST /gemini/guess', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
 })
 
