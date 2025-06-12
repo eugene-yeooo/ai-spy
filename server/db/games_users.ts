@@ -24,3 +24,19 @@ export async function deleteGameLogById(id: number) {
   .where({ id })
   .del()
 }
+
+// Add
+type NewGameLog = {
+  user_id: number
+  status: boolean
+  question_used: number
+  hint_used: number
+  ai_answer: string
+  question_text: string
+  ai_response: string
+  created_at: string
+}
+
+export async function addGameLog(data: NewGameLog) {
+  return await db('gameslog').insert(data)
+}

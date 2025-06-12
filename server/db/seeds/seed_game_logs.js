@@ -22,5 +22,14 @@ export async function seed(knex) {
       question_text: 'Tallest animal?',
       ai_response: 'Incorrect',
     },
+    {
+      user_id: 3,
+      status: false,
+      question_used: 1,
+      hint_used: 0,
+      ai_answer: 'Giraffe',
+      question_text: 'Tallest animal?',
+      ai_response: 'Incorrect',
+    },
   ])
 }

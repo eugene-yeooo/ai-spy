@@ -36,5 +36,20 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to delete game log' })
   }
 })
-    
+
+// POSt /api/v1/gamelogs
+router.post('/', async (req, res) => {
+  const newLog = req.body
+
+  if (!newLog || !newLog.user_id || !newLog.question_text ) 
+    return res.status(400).json({ error: 'Invalid ID' })
+
+try {
+  const id = await db.addGameLog(newLog)
+  res.status(201).json({ id, message: 'Game log created' })
+} catch (err) {
+  console.error(err)
+  res.status(500).json({ error: 'Failed to create game log' })
+}
+})
 export default router
