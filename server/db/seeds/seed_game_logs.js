@@ -1,9 +1,9 @@
 export async function seed(knex) {
   // Deletes ALL existing entries
-  await knex('game_logs').del()
+  await knex('gameslog').del()
 
   // Inserts seed entries
-  await knex('game_logs').insert([
+  await knex('gameslog').insert([
     {
       user_id: 1,
       status: true,
