@@ -146,7 +146,7 @@ export default function GameLogic() {
             <label className="mb-1 block">Topic</label>
             <input
               type="text"
-              className="w-full rounded border px-3 py-2"
+              className="w-full rounded border px-3 py-2 text-black"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="e.g. New Zealand towns, animals"
@@ -156,7 +156,7 @@ export default function GameLogic() {
           <div>
             <label className="mb-1 block">Difficulty</label>
             <select
-              className="w-full rounded border px-3 py-2"
+              className="w-full rounded border px-3 py-2 text-black"
               value={level}
               onChange={(e) => setLevel(e.target.value)}
             >
