@@ -1,5 +1,5 @@
 import request from 'superagent'
-import { SendGuessData } from '../../models/models'
+import { GameLogData, SendGuessData } from '../../models/models'
 
 const rootUrl = new URL('/api/v1', document.baseURI)
 
@@ -27,4 +27,16 @@ export async function sendGuess(data: SendGuessData) {
   }
 
   return res.body as { aiResponse: string }
+}
+
+
+//submitGameStats
+export async function submitGameStats(stats:GameLogData) {
+  try {
+    const res = await request.post(`${rootUrl}/gamelogs`).send(stats)
+    console.log('game log created:', res.body)
+  }catch (error){
+    console.error('failed to save game stats', error)
+
+    }
 }

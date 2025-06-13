@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { getGameStart, sendGuess } from '../apis/gemini'
+
+import { getGameStart, sendGuess, submitGameStats } from '../apis/gemini'
 import { SendGuessData, Message } from '../../models/models'
 
 export default function GameLogic() {
@@ -82,6 +83,7 @@ export default function GameLogic() {
       console.error(error)
     }
   }
+
 
   const handleGiveUp = () => {
     setConversation((prev) => [
@@ -259,6 +261,7 @@ export default function GameLogic() {
           >
             Play Again
           </button>
+
         </div>
       )}
     </div>

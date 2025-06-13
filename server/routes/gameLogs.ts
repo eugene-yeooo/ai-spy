@@ -41,8 +41,15 @@ router.delete('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   const newLog = req.body
 
-  if (!newLog || !newLog.user_id || !newLog.question_text ) 
-    return res.status(400).json({ error: 'Invalid ID' })
+  if (!newLog || 
+    !newLog.user_id  || 
+    !newLog.question_text || 
+    !newLog.status ||
+    !newLog.question_used ||
+    !newLog.hint_used ||
+    !newLog.ai_answer
+  ) 
+    return res.status(400).json({ error: 'Missing or invalid fields' })
 
 try {
   const id = await db.addGameLog(newLog)
