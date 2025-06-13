@@ -84,7 +84,6 @@ export default function GameLogic() {
     }
   }
 
-
   const handleGiveUp = () => {
     setConversation((prev) => [
       ...prev,
@@ -136,6 +135,18 @@ export default function GameLogic() {
     setQuestionCount(0)
     setDidWin(false)
     setHintCount(0)
+  }
+
+  const handleSubmitStats = async () => {
+    const stats = {
+      user_id: 3,
+      question_text: topic,
+      status: stage === 'finished' && answer !== '',
+      question_used: questionCount,
+      hint_used: hintCount,
+      ai_answer: answer,
+    }
+    await submitGameStats(stats)
   }
 
   return (
@@ -261,7 +272,12 @@ export default function GameLogic() {
           >
             Play Again
           </button>
-
+          <button
+            onClick={handleSubmitStats}
+            className="rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
+          >
+            Submit Game Stats
+          </button>
         </div>
       )}
     </div>
