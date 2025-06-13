@@ -5,43 +5,48 @@ import { IfAuthenticated, IfNotAuthenticated } from '../utilities/Authenticated'
 function Login() {
   const { user, logout, loginWithRedirect } = useAuth0()
 
-  const handleSignOut = () => {
-    return logout()
-  }
-
-  const handleSignIn = () => {
-    return loginWithRedirect()
-  }
-
-  const buttonStyle =
-    'fixed right-4 top-4 border px-2 py-1 bg-black text-white rounded'
+  const handleSignOut = () => logout()
+  const handleSignIn = () => loginWithRedirect()
 
   return (
-    <div className="w-80 rounded-2xl bg-white/5 p-10 text-center shadow-xl">
-      <h1 className="mb-6 text-2xl font-bold text-white">Login Page</h1>
-      <div>
+    <div className="w-80 space-y-6 rounded-2xl bg-white/5 p-10 text-center shadow-xl">
+      <h1 className="text-2xl font-bold text-white">Login Page</h1>
+
+      {/* Auth Section */}
+      <div className="space-y-4">
         <IfAuthenticated>
-          <div className="fixed right-4 top-2">
-            <button onClick={handleSignOut} className={buttonStyle}>
+          <div className="space-y-2 text-white">
+            <button
+              onClick={handleSignOut}
+              className="w-full rounded-xl bg-red-600 py-2 font-semibold text-white transition-all hover:bg-red-700"
+            >
               Sign out
             </button>
             {user && (
-              <img
-                src={user?.picture}
-                alt={user?.given_name}
-                referrerPolicy="no-referrer"
-                className="h-30 w-30 rounded-full"
-              />
+              <div className="flex flex-col items-center">
+                <img
+                  src={user?.picture}
+                  alt={user?.given_name}
+                  referrerPolicy="no-referrer"
+                  className="h-16 w-16 rounded-full object-cover"
+                />
+                <p className="text-sm">Signed in as: {user?.nickname}</p>
+              </div>
             )}
-            {user && <p>Signed in as: {user?.nickname}</p>}
           </div>
         </IfAuthenticated>
+
         <IfNotAuthenticated>
-          <button onClick={handleSignIn} className={buttonStyle}>
+          <button
+            onClick={handleSignIn}
+            className="w-full rounded-xl bg-blue-600 py-2 font-semibold text-white transition-all hover:bg-blue-700"
+          >
             Sign in
           </button>
         </IfNotAuthenticated>
       </div>
+
+      {/* Navigation Links */}
       <ul className="space-y-4">
         <li>
           <Link
