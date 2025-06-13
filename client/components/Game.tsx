@@ -21,7 +21,7 @@ export default function GameLogic() {
     }
 
     try {
-      const res = await getGameStart(topic, level)
+      const res = await getGameStart(level, topic)
       setAnswer(res.answer)
       setConversation([{ sender: 'ai', text: res.introMessage }])
       setStage('playing')
