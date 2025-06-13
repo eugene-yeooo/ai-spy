@@ -187,7 +187,7 @@ export default function GameLogic() {
           </p>
           <p>Hints used: {hintCount}</p>
 
-          <div className="max-h-64 space-y-2 overflow-y-auto rounded border bg-gray-50 p-2 text-black">
+          <div className="space-y-2 overflow-y-auto rounded border bg-gray-50 p-2 text-black">
             {conversation.map((msg, i) => (
               <div
                 key={i}
