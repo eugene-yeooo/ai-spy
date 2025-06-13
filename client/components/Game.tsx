@@ -187,7 +187,7 @@ export default function GameLogic() {
           </p>
           <p>Hints used: {hintCount}</p>
 
-          <div className="max-h-64 space-y-2 overflow-y-auto rounded border bg-gray-50 p-2">
+          <div className="max-h-64 space-y-2 overflow-y-auto rounded border bg-gray-50 p-2 text-black">
             {conversation.map((msg, i) => (
               <div
                 key={i}
@@ -203,7 +203,7 @@ export default function GameLogic() {
 
           <input
             type="text"
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 text-black"
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             placeholder="Type a yes/no question or guess the answer"
