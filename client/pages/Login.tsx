@@ -17,10 +17,8 @@ function Login() {
     'fixed right-4 top-4 border px-2 py-1 bg-black text-white rounded'
 
   return (
-    <>
-      <div className="app">
-        <h1>Login Page</h1>
-      </div>
+    <div className="w-80 rounded-2xl bg-white/5 p-10 text-center shadow-xl">
+      <h1 className="mb-6 text-2xl font-bold text-white">Login Page</h1>
       <div>
         <IfAuthenticated>
           <div className="fixed right-4 top-2">
@@ -44,15 +42,25 @@ function Login() {
           </button>
         </IfNotAuthenticated>
       </div>
-      <ul>
-        <Link to="/game">
-          <li>Start Game</li>
-        </Link>
-        <Link to="/gamelog">
-          <li>Game Log</li>
-        </Link>
+      <ul className="space-y-4">
+        <li>
+          <Link
+            to="/game"
+            className="block w-full rounded-xl bg-green-500 py-3 font-semibold text-white transition-all hover:bg-green-600"
+          >
+            Start Game
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/gamelog"
+            className="block w-full rounded-xl bg-purple-500 py-3 font-semibold text-white transition-all hover:bg-purple-600"
+          >
+            Game Log
+          </Link>
+        </li>
       </ul>
-    </>
+    </div>
   )
 }
 

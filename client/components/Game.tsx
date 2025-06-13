@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { getGameStart, sendGuess } from '../apis/gemini'
-import { SendGuessData } from '../../models/models'
+import { SendGuessData, Message } from '../../models/models'
 
 export default function GameLogic() {
   const [stage, setStage] = useState<'setup' | 'playing' | 'finished'>('setup')
@@ -10,9 +10,9 @@ export default function GameLogic() {
   const [level, setLevel] = useState('')
   const [userInput, setUserInput] = useState('')
   const [questionCount, setQuestionCount] = useState(0)
+  const [didWin, setDidWin] = useState(false)
+  const [hintCount, setHintCount] = useState(0)
   const maxQuestions = 20
-
-  type Message = { sender: 'user' | 'ai'; text: string }
 
   const handleStartGame = async () => {
     if (!level || !topic) {
@@ -26,6 +26,7 @@ export default function GameLogic() {
       setConversation([{ sender: 'ai', text: res.introMessage }])
       setStage('playing')
       setQuestionCount(0)
+      setDidWin(false)
     } catch (error) {
       console.error('error starting game', error)
     }
@@ -33,9 +34,27 @@ export default function GameLogic() {
 
   const handleSubmitQuestion = async () => {
     if (!userInput.trim()) return
-    if (questionCount >= maxQuestions) {
-      alert('You have reached the maximum number of questions!')
+
+    // Check for win
+    if (userInput.toLowerCase() === answer.toLowerCase()) {
+      setConversation((prev) => [
+        ...prev,
+        { sender: 'user', text: userInput },
+        { sender: 'ai', text: '🎉 Correct! You guessed it!' },
+      ])
+      setDidWin(true)
       setStage('finished')
+      return
+    }
+
+    // Check if user input contains "hint"
+    if (userInput.toLowerCase().includes('hint')) {
+      setHintCount((count) => count + 1)
+    }
+
+    //check if hint
+    if (userInput.toLowerCase().includes('hint')) {
+      setHintCount((count) => count + 1)
     }
 
     const data: SendGuessData = {
@@ -45,7 +64,6 @@ export default function GameLogic() {
       userInput,
     }
 
-    // Update convo with user question and AI answer
     try {
       const res = await sendGuess(data)
       setConversation((prev) => [
@@ -55,10 +73,67 @@ export default function GameLogic() {
       ])
       setUserInput('')
       setQuestionCount((count) => count + 1)
+
+      if (questionCount + 1 >= maxQuestions) {
+        setStage('finished')
+      }
     } catch (error) {
       alert('Error submitting question')
       console.error(error)
     }
+  }
+
+  const handleGiveUp = () => {
+    setConversation((prev) => [
+      ...prev,
+      { sender: 'user', text: 'I give up' },
+      { sender: 'ai', text: `The correct answer was: ${answer}` },
+    ])
+    setDidWin(false)
+    setStage('finished')
+  }
+
+  const handleHint = async () => {
+    if (hintCount >= 3) {
+      setConversation((prev) => [
+        ...prev,
+        { sender: 'ai', text: "You've used all your hints!" },
+      ])
+      return
+    }
+
+    try {
+      const data: SendGuessData = {
+        answer,
+        topic,
+        conversation,
+        userInput: 'hint',
+      }
+
+      const res = await sendGuess(data)
+
+      setHintCount((count) => count + 1)
+      setConversation((prev) => [
+        ...prev,
+        { sender: 'user', text: 'Hint please' },
+        { sender: 'ai', text: res.aiResponse },
+      ])
+    } catch (error) {
+      alert('Error getting hint')
+      console.error(error)
+    }
+  }
+
+  const handleRestart = () => {
+    setStage('setup')
+    setConversation([])
+    setTopic('')
+    setLevel('')
+    setAnswer('')
+    setUserInput('')
+    setQuestionCount(0)
+    setDidWin(false)
+    setHintCount(0)
   }
 
   return (
@@ -110,6 +185,7 @@ export default function GameLogic() {
           <p>
             Questions asked: {questionCount} / {maxQuestions}
           </p>
+          <p>Hints used: {hintCount}</p>
 
           <div className="max-h-64 space-y-2 overflow-y-auto rounded border bg-gray-50 p-2">
             {conversation.map((msg, i) => (
@@ -130,35 +206,55 @@ export default function GameLogic() {
             className="w-full rounded border px-3 py-2"
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            placeholder="Type a yes/no question"
+            placeholder="Type a yes/no question or guess the answer"
           />
 
-          <button
-            onClick={handleSubmitQuestion}
-            className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
-          >
-            Ask
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleSubmitQuestion}
+              className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+            >
+              Ask
+            </button>
+            <button
+              onClick={handleHint}
+              className="rounded bg-pink-500 px-4 py-2 text-white hover:bg-red-600"
+            >
+              Hint Please
+            </button>
+            <button
+              onClick={handleGiveUp}
+              className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+            >
+              I Give Up
+            </button>
+          </div>
         </div>
       )}
 
       {stage === 'finished' && (
         <div className="space-y-4 text-center">
-          <h2 className="text-2xl font-bold">Game Over</h2>
+          <h2 className="text-2xl font-bold">
+            {didWin ? 'You Won! 🎉' : 'Game Over'}
+          </h2>
+
           <p>
             The answer was: <strong>{answer}</strong>
           </p>
 
+          <div className="mt-4 text-left">
+            <h3 className="font-semibold">Game Stats:</h3>
+            <ul className="list-disc pl-5">
+              <li>Topic: {topic}</li>
+              <li>Difficulty: {level}</li>
+              <li>Questions Asked: {questionCount}</li>
+              <li>Hints used: {hintCount}</li>
+              <li>Result: {didWin ? 'Guessed Correctly' : 'Gave Up'}</li>
+            </ul>
+          </div>
+
           <button
-            onClick={() => {
-              setStage('setup')
-              setConversation([])
-              setTopic('')
-              setLevel('')
-              setAnswer('')
-              setUserInput('')
-              setQuestionCount(0)
-            }}
+            onClick={handleRestart}
             className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             Play Again
