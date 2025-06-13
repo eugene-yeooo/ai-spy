@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { getGameStart, sendGuess } from '../apis/gemini'
+import { getGameStart, sendGuess, submitGameStats } from '../apis/gemini'
 import { SendGuessData } from '../../models/models'
+
 
 export default function GameLogic() {
   const [stage, setStage] = useState<'setup' | 'playing' | 'finished'>('setup')
@@ -60,6 +61,7 @@ export default function GameLogic() {
       console.error(error)
     }
   }
+
 
   return (
     <div className="mx-auto max-w-xl p-4">
@@ -163,6 +165,7 @@ export default function GameLogic() {
           >
             Play Again
           </button>
+
         </div>
       )}
     </div>
