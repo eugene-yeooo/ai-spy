@@ -26,7 +26,6 @@ export default function GameLogic() {
       setConversation([{ sender: 'ai', text: res.introMessage }])
       setStage('playing')
       setQuestionCount(0)
-      setAnswer('')
     } catch (error) {
       console.error('error starting game', error)
     }
