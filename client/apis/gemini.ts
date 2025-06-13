@@ -6,7 +6,7 @@ const rootUrl = new URL('/api/v1', document.baseURI)
 //gameStart
 export async function getGameStart(level: string, topic: string) {
   const res = await request.get(
-    `${rootUrl}gemini/start?level=${level}&topic=${topic}`,
+    `${rootUrl}/gemini/start?level=${level}&topic=${topic}`,
   )
 
   if (!res.ok) {
