@@ -11,6 +11,7 @@ export default function GameLogic() {
   const [userInput, setUserInput] = useState('')
   const [questionCount, setQuestionCount] = useState(0)
   const [didWin, setDidWin] = useState(false)
+  const [hintCount, setHintCount] = useState(0)
   const maxQuestions = 20
 
   const handleStartGame = async () => {
@@ -44,6 +45,16 @@ export default function GameLogic() {
       setDidWin(true)
       setStage('finished')
       return
+    }
+
+    // Check if user input contains "hint"
+    if (userInput.toLowerCase().includes('hint')) {
+      setHintCount((count) => count + 1)
+    }
+
+    //check if hint
+    if (userInput.toLowerCase().includes('hint')) {
+      setHintCount((count) => count + 1)
     }
 
     const data: SendGuessData = {
@@ -82,6 +93,37 @@ export default function GameLogic() {
     setStage('finished')
   }
 
+  const handleHint = async () => {
+    if (hintCount >= 3) {
+      setConversation((prev) => [
+        ...prev,
+        { sender: 'ai', text: "You've used all your hints!" },
+      ])
+      return
+    }
+
+    try {
+      const data: SendGuessData = {
+        answer,
+        topic,
+        conversation,
+        userInput: 'hint',
+      }
+
+      const res = await sendGuess(data)
+
+      setHintCount((count) => count + 1)
+      setConversation((prev) => [
+        ...prev,
+        { sender: 'user', text: 'Hint please' },
+        { sender: 'ai', text: res.aiResponse },
+      ])
+    } catch (error) {
+      alert('Error getting hint')
+      console.error(error)
+    }
+  }
+
   const handleRestart = () => {
     setStage('setup')
     setConversation([])
@@ -91,6 +133,7 @@ export default function GameLogic() {
     setUserInput('')
     setQuestionCount(0)
     setDidWin(false)
+    setHintCount(0)
   }
 
   return (
@@ -142,6 +185,7 @@ export default function GameLogic() {
           <p>
             Questions asked: {questionCount} / {maxQuestions}
           </p>
+          <p>Hints used: {hintCount}</p>
 
           <div className="max-h-64 space-y-2 overflow-y-auto rounded border bg-gray-50 p-2">
             {conversation.map((msg, i) => (
@@ -173,6 +217,12 @@ export default function GameLogic() {
               Ask
             </button>
             <button
+              onClick={handleHint}
+              className="rounded bg-pink-500 px-4 py-2 text-white hover:bg-red-600"
+            >
+              Hint Please
+            </button>
+            <button
               onClick={handleGiveUp}
               className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
             >
@@ -198,6 +248,7 @@ export default function GameLogic() {
               <li>Topic: {topic}</li>
               <li>Difficulty: {level}</li>
               <li>Questions Asked: {questionCount}</li>
+              <li>Hints used: {hintCount}</li>
               <li>Result: {didWin ? 'Guessed Correctly' : 'Gave Up'}</li>
             </ul>
           </div>
