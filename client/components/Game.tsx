@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { getGameStart, sendGuess, submitGameStats } from '../apis/gemini'
 import { SendGuessData, Message } from '../../models/models'
+import { useNavigate } from 'react-router-dom'
 
 export default function GameLogic() {
   const [stage, setStage] = useState<'setup' | 'playing' | 'finished'>('setup')
@@ -14,6 +15,7 @@ export default function GameLogic() {
   const [didWin, setDidWin] = useState(false)
   const [hintCount, setHintCount] = useState(0)
   const maxQuestions = 20
+  const navigate = useNavigate()
 
   const handleStartGame = async () => {
     if (!level || !topic) {
@@ -147,6 +149,7 @@ export default function GameLogic() {
       ai_answer: answer,
     }
     await submitGameStats(stats)
+    navigate('/gamelog')
   }
 
   return (
@@ -268,7 +271,7 @@ export default function GameLogic() {
 
           <button
             onClick={handleRestart}
-            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            className="mr-3 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             Play Again
           </button>
