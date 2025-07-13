@@ -2,7 +2,7 @@ import { Outlet, Link } from 'react-router-dom'
 
 export default function Layout() {
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-r from-[#1e1e2f] to-[#2c2c47] text-white">
+    <div className="flex min-h-screen flex-col bg-gradient-to-r from-[#805151] to-[#417474] text-white">
       <header className="bg-white/10 p-4 text-center shadow-md">
         <Link
           to="/"
